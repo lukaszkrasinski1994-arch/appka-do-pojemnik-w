@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>WPO ALBA – System Magazynowy</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #ffffff; 
+      --fg: #222222; 
+      --muted: #555555;
+      --alba-blue: #132b5e;       
+      --alba-green: #2fa13e;      
+      --alba-blue-weak: rgba(19, 43, 94, 0.06); 
+      --alba-green-weak: rgba(47, 161, 62, 0.1);
+      --err: #dc2626; 
+      --field-border: #cbd5e1;
+    }
+    
+    * { box-sizing: border-box; }
+    body { font-family: 'Open Sans', sans-serif; margin: 0; background: #f8fafc; color: var(--fg); padding-bottom: 80px; }
+    
+    header { background: var(--bg); position: sticky; top: 0; z-index: 10; box-shadow: 0 2px 10px rgba(0,0,0,0.05); border-bottom: 4px solid var(--alba-blue); }
+    header .topbar { height: 6px; background: var(--alba-green); }
+    header .wrap { max-width: 1400px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; }
+    .header-left { display: flex; align-items: center; gap: 24px; }
+    header h1 { font-family: 'Montserrat', sans-serif; margin: 0; font-size: 22px; line-height: 1.2; font-weight: 800; color: var(--alba-blue); letter-spacing: -0.3px; border-left: 2px solid var(--field-border); padding-left: 24px; }
+    header img { height: 46px; object-fit: contain; }
+    
+    .header-right { text-align: right; display: flex; flex-direction: row; align-items: center; gap: 20px;}
+    #clock-time { font-family: 'Montserrat', sans-serif; font-size: 24px; font-weight: 800; color: var(--alba-blue); line-height: 1; }
+    
+    main { padding: 30px 20px; max-width: 1400px; margin: 0 auto; }
+
+    .card { background: #fff; border: 1px solid var(--field-border); border-radius: 12px; padding: 24px; margin-bottom: 24px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); position: relative; }
+    .card .card-top { height: 6px; background: linear-gradient(90deg, var(--alba-blue) 50%, var(--alba-green) 50%); border-radius: 8px 8px 0 0; margin: -24px -24px 20px -24px; }
+    
+    label { font-family: 'Montserrat', sans-serif; display: block; margin-bottom: 8px; color: var(--alba-blue); font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+    input[type="text"], input[type="number"], input[type="date"], select, textarea { width: 100%; padding: 10px; background: #fff; color: var(--fg); border: 1px solid var(--field-border); border-radius: 8px; font-family: inherit; font-size: 14px; transition: border-color 0.2s; }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: var(--alba-green); box-shadow: 0 0 0 3px var(--alba-green-weak); }
+    
+    .row-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 16px; }
+    .row-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 16px; }
+    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+
+    .btn { font-family: 'Montserrat', sans-serif; background: var(--alba-green); color: #fff; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 700; cursor: pointer; transition: 0.2s; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; display: inline-flex; align-items: center; justify-content: center; gap: 8px;}
+    .btn:hover { background: #258031; transform: translateY(-1px); box-shadow: 0 4px 8px var(--alba-green-weak); }
+    .btn.outline { background: #fff; color: var(--alba-blue); border: 2px solid var(--alba-blue); }
+    .btn.outline:hover { background: var(--alba-blue-weak); color: var(--alba-blue); }
+    .btn.blue { background: var(--alba-blue); color: #fff; }
+    .btn.blue:hover { background: #0c1b3d; }
+    .btn.small { padding: 8px 16px; font-size: 12px; border-radius: 6px; }
+    .btn.danger { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+    .btn.danger:hover { background: #fca5a5; color: #7f1d1d; }
+
+    .title { font-family: 'Montserrat', sans-serif; font-weight: 800; color: var(--alba-blue); font-size: 20px; margin-bottom: 16px; }
+
+    table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; margin-top: 16px; }
+    thead tr th { font-family: 'Montserrat', sans-serif; background: var(--alba-blue); color: #fff; padding: 14px 12px; text-align: left; font-weight: 600; font-size: 12px; letter-spacing: 0.3px; }
+    thead tr th:first-child { border-top-left-radius: 8px; }
+    thead tr th:last-child { border-top-right-radius: 8px; }
+    tbody tr:nth-child(even) { background: #f8fafc; }
+    tbody tr:hover { background: var(--alba-blue-weak); }
+    th, td { padding: 12px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
+
+    .tabs { display: flex; gap: 12px; margin-bottom: 24px; }
+    .tab-btn { flex: 1; text-align: center; padding: 16px; background: #fff; border: 2px solid var(--field-border); border-radius: 8px; font-family: 'Montserrat', sans-serif; font-weight: 700; color: var(--muted); cursor: pointer; transition: 0.2s; text-transform: uppercase; font-size: 13px; }
+    .tab-btn:hover { border-color: var(--alba-blue); color: var(--alba-blue); }
+    .tab-btn.active { background: var(--alba-blue); color: #fff; border-color: var(--alba-blue); box-shadow: 0 4px 12px rgba(19, 43, 94, 0.2); }
+
+    .view { display: none; }
+    .view.active { display: block; }
+
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 100; backdrop-filter: blur(3px); }
+    .modal-overlay.active { display: flex; }
+    .modal { background: #fff; padding: 30px; border-radius: 12px; width: 100%; max-width: 850px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border-top: 6px solid var(--alba-green); }
+    .modal textarea { height: 260px; resize: none; margin-bottom: 16px; line-height: 1.5; font-size: 14px; }
+
+    .list-container { max-height: 300px; overflow-y: auto; border: 1px solid var(--field-border); border-radius: 8px; margin-top: 12px; }
+    .list-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; border-bottom: 1px solid #e2e8f0; }
+    .list-item:nth-child(even) { background: #f8fafc; }
+
+    .flex-group { display: flex; gap: 8px; align-items: flex-end; }
+    .header-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; }
+
+    .stock-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .stock-box { background: #fff; border: 1px solid var(--alba-blue); border-radius: 8px; padding: 20px; text-align: center; box-shadow: 0 4px 10px var(--alba-blue-weak); }
+    .stock-val { font-size: 32px; font-weight: 800; font-family: 'Montserrat', sans-serif; color: var(--alba-green); margin: 8px 0; }
+    .stock-name { font-size: 14px; font-weight: 700; color: var(--alba-blue); text-transform: uppercase; }
+
+    .badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 800; }
+    .badge-PZ { background: var(--alba-green-weak); color: var(--alba-green); }
+    .badge-WZ { background: #fee2e2; color: #dc2626; }
+    .badge-MM { background: #fef08a; color: #854d0e; }
+    .badge-ZN { background: #f3f4f6; color: #4b5563; }
+    .badge-KAS { background: #000; color: #fff; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="topbar"></div>
+    <div class="wrap">
+      <div class="header-left">
+        <img alt="ALBA – logo" src="https://www.alba.com.pl/download/17.jpg" />
+        <h1>System Magazynowy WPO ALBA</h1>
+      </div>
+      <div class="header-right">
+        <div id="clock-time">--:--:--</div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="tabs">
+      <div class="tab-btn active" onclick="switchTab('stock')">📦 Stan Magazynu</div>
+      <div class="tab-btn" onclick="switchTab('docs')">📄 Operacje (WZ, PZ, MM...)</div>
+      <div class="tab-btn" onclick="switchTab('admin')">⚙️ Administracja (Słowniki)</div>
+    </div>
+
+    <div id="view-stock" class="view active">
+      <div class="card">
+        <div class="card-top"></div>
+        <div class="header-actions">
+          <div class="title" style="margin: 0;">Bieżący stan pojemników</div>
+          <button class="btn blue" onclick="openEmailModal()">✉️ Wyślij raport e-mail</button>
+        </div>
+        <p style="color:var(--muted); font-size:13px; margin-top:0; margin-bottom:24px;">Zestawienie obliczane automatycznie na podstawie dokumentów magazynowych (PZ, WZ, Kasacje itd.)</p>
+        
+        <div class="stock-grid" id="stock-container">
+          </div>
+      </div>
+    </div>
+
+    <div id="view-docs" class="view">
+      <div class="card">
+        <div class="card-top"></div>
+        <div class="title">Wystaw nowy dokument</div>
+        
+        <div class="row-5">
+          <div>
+            <label>Typ Dokumentu</label>
+            <select id="doc-type" onchange="onDocTypeChange()">
+              <option value="PZ">PZ (Przyjęcie Zewnętrzne)</option>
+              <option value="WZ">WZ (Wydanie Zewnętrzne)</option>
+              <option value="MM">MM (Przesunięcie Międzymagazynowe)</option>
+              <option value="ZN">Dokument Zniszczenia (ZN)</option>
+              <option value="KAS">Protokół Kasacji (KAS)</option>
+            </select>
+          </div>
+          <div>
+            <label>Data</label>
+            <input type="date" id="doc-date" />
+          </div>
+          <div>
+            <label>Pojazd (Boczny/Rej)</label>
+            <select id="doc-vehicle" class="sel-vehicle"><option value="">-- Opcjonalnie --</option></select>
+          </div>
+          <div>
+            <label>Kierowca</label>
+            <select id="doc-driver" class="sel-driver"><option value="">-- Opcjonalnie --</option></select>
+          </div>
+          <div>
+            <label>Nr obcy / Od kogo / Dla kogo</label>
+            <input type="text" id="doc-reference" placeholder="Np. nazwa klienta, nr faktury" />
+          </div>
+        </div>
+
+        <div style="background: #f8fafc; border: 1px solid var(--field-border); border-radius: 8px; padding: 16px; margin-bottom: 16px;">
+          <label style="color:var(--alba-green);">Pozycje na dokumencie (Pojemniki)</label>
+          <div class="row-4" style="align-items: flex-end;">
+            <div>
+              <label style="font-size: 11px; margin-bottom:4px;">Wybierz Pojemnik</label>
+              <select id="doc-container-type" class="sel-container"><option value="">-- Wybierz --</option></select>
+            </div>
+            <div>
+              <label style="font-size: 11px; margin-bottom:4px;">Ilość sztuk</label>
+              <input type="number" id="doc-amount" value="1" min="1" />
+            </div>
+            <div style="grid-column: span 2;">
+              <label style="font-size: 11px; margin-bottom:4px;">Uwagi dodatkowe</label>
+              <input type="text" id="doc-notes" placeholder="np. używane, rączka pęknięta" />
+            </div>
+          </div>
+        </div>
+
+        <button class="btn blue" onclick="addDocument()">➕ Zatwierdź i zapisz dokument</button>
+      </div>
+
+      <div class="card">
+        <div class="title" style="margin: 0;">Rejestr Dokumentów Magazynowych</div>
+        <div style="overflow-x: auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Typ</th>
+                <th>Pojemnik</th>
+                <th style="text-align: center;">Ilość</th>
+                <th>Pojazd</th>
+                <th>Kierowca</th>
+                <th>Dane dodatkowe / Uwagi</th>
+                <th style="text-align: right;">Akcja</th>
+              </tr>
+            </thead>
+            <tbody id="docs-tbody">
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div id="view-admin" class="view">
+      <div class="card">
+        <div class="card-top"></div>
+        <div class="title">Zarządzanie Słownikami Magazynu</div>
+        
+        <div class="row-2">
+          
+          <div style="background: #f8fafc; padding: 16px; border-radius: 8px; border: 1px solid var(--field-border);">
+            <label>Rodzaje Pojemników</label>
+            <div class="flex-group">
+              <input type="text" id="inp-container" placeholder="np. 240L Plastik Czarny">
+              <button class="btn outline" onclick="addDictItem('containers', 'inp-container')">Dodaj</button>
+            </div>
+            <div class="list-container" id="list-containers"></div>
+          </div>
+
+          <div style="background: #f8fafc; padding: 16px; border-radius: 8px; border: 1px solid var(--field-border);">
+            <label>Odbiorcy raportów e-mail</label>
+            <div class="flex-group">
+              <input type="email" id="inp-email" placeholder="np. kierownik@alba.com.pl">
+              <button class="btn outline" onclick="addDictItem('emails', 'inp-email')">Dodaj</button>
+            </div>
+            <div class="list-container" id="list-emails"></div>
+          </div>
+
+          <div style="background: #f8fafc; padding: 16px; border-radius: 8px; border: 1px solid var(--field-border);">
+            <label>Pojazdy</label>
+            <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; align-items: flex-end; margin-bottom: 12px;">
+              <div><input type="text" id="inp-vehicle-side" placeholder="Nr boczny (B118)"></div>
+              <div><input type="text" id="inp-vehicle-reg" placeholder="Nr rej. (DW2TL)"></div>
+              <button class="btn outline" onclick="addVehicle()">Dodaj</button>
+            </div>
+            <div class="list-container" id="list-vehicles"></div>
+          </div>
+
+          <div style="background: #f8fafc; padding: 16px; border-radius: 8px; border: 1px solid var(--field-border);">
+            <label>Kierowcy</label>
+            <div class="flex-group">
+              <input type="text" id="inp-driver-name" placeholder="Imię i Nazwisko">
+              <button class="btn outline" onclick="addDriver()">Dodaj</button>
+            </div>
+            <div class="list-container" id="list-drivers"></div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div class="modal-overlay" id="email-modal">
+    <div class="modal">
+      <div class="title" style="margin-top:0;">Raport stanu magazynu</div>
+      <p style="color:var(--muted); font-size:13px; margin-bottom:16px;">Poniżej wygenerowano gotowy tekst z aktualnymi stanami pojemników.</p>
+      
+      <textarea id="email-content"></textarea>
+      
+      <div style="display:flex; justify-content: flex-end; gap: 12px; align-items: center; flex-wrap: wrap;">
+        <button class="btn outline small" onclick="closeModal()">Zamknij</button>
+        <button class="btn outline" onclick="copyEmail()">📋 Kopiuj tekst</button>
+        <button class="btn blue" onclick="openMailClient()">📧 Otwórz w Outlook (Wyślij do bazy)</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // ZEGAR
+  function updateClock() {
+      const now = new Date();
+      const hh = String(now.getHours()).padStart(2, '0');
+      const mm = String(now.getMinutes()).padStart(2, '0');
+      const ss = String(now.getSeconds()).padStart(2, '0');
+      document.getElementById('clock-time').textContent = `${hh}:${mm}:${ss}`;
+  }
+  setInterval(updateClock, 1000);
+  updateClock();
+
+  // BAZA DANYCH LOKALNA (Zamiast Firebase dla celów demonstracyjnych/szybkiego wdrożenia)
+  let db = {
+      containers: ['120L Plastik', '240L Plastik', '1100L Plastik', '1100L Metal', 'KP-7', 'Bateria 2.5m3'],
+      emails: ['dyspozytor@alba.com.pl', 'magazyn@alba.com.pl'],
+      vehicles: [{sideNumber: 'B118', regNumber: 'DW12345'}],
+      drivers: [{name: 'Jan Kowalski'}],
+      docs: []
+  };
+
+  // Ładowanie z LocalStorage
+  if(localStorage.getItem('albaMagazyn')) {
+      db = JSON.parse(localStorage.getItem('albaMagazyn'));
+  } else {
+      saveDb(); // zapisz domyślne jeśli pusto
+  }
+
+  function saveDb() {
+      localStorage.setItem('albaMagazyn', JSON.stringify(db));
+      refreshUI();
+  }
+
+  window.onload = () => {
+    document.getElementById('doc-date').valueAsDate = new Date();
+    refreshUI();
+  };
+
+  function refreshUI() {
+      renderAdminLists();
+      renderSelects();
+      renderDocs();
+      renderStock();
+  }
+
+  function switchTab(tab) {
+    document.querySelectorAll('.tabs > .tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    
+    document.querySelector(`.tab-btn[onclick="switchTab('${tab}')"]`).classList.add('active');
+    document.getElementById(`view-${tab}`).classList.add('active');
+  }
+
+  // OBLICZANIE STANU
+  function calculateStock() {
+      let stock = {};
+      db.containers.forEach(c => stock[c] = 0);
+
+      db.docs.forEach(d => {
+          if (!stock[d.container]) stock[d.container] = 0;
+          let qty = parseInt(d.amount);
+          
+          if(d.type === 'PZ') {
+              stock[d.container] += qty;
+          } else if (['WZ', 'MM', 'ZN', 'KAS'].includes(d.type)) {
+              stock[d.container] -= qty;
+          }
+      });
+      return stock;
+  }
+
+  function renderStock() {
+      const container = document.getElementById('stock-container');
+      container.innerHTML = '';
+      
+      const stockData = calculateStock();
+      
+      for (const [name, qty] of Object.entries(stockData)) {
+          let colorStyle = qty < 0 ? 'color: var(--err);' : 'color: var(--alba-green);';
+          container.innerHTML += `
+            <div class="stock-box">
+              <div class="stock-name">${name}</div>
+              <div class="stock-val" style="${colorStyle}">${qty}</div>
+              <div style="font-size: 11px; color: var(--muted);">sztuk na magazynie</div>
+            </div>
+          `;
+      }
+  }
+
+  // DOKUMENTY MAG.
+  function addDocument() {
+      const type = document.getElementById('doc-type').value;
+      const date = document.getElementById('doc-date').value;
+      const vehicle = document.getElementById('doc-vehicle').value;
+      const driver = document.getElementById('doc-driver').value;
+      const reference = document.getElementById('doc-reference').value;
+      const container = document.getElementById('doc-container-type').value;
+      const amount = document.getElementById('doc-amount').value;
+      const notes = document.getElementById('doc-notes').value;
+
+      if(!date || !type || !container || !amount) {
+          alert("Typ, Data, Pojemnik i Ilość są wymagane!");
+          return;
+      }
+
+      db.docs.push({
+          id: Date.now().toString(),
+          type, date, vehicle, driver, reference, container, amount, notes
+      });
+
+      document.getElementById('doc-reference').value = '';
+      document.getElementById('doc-amount').value = 1;
+      document.getElementById('doc-notes').value = '';
+      
+      saveDb();
+      alert(`Wystawiono dokument ${type}!`);
+      switchTab('stock');
+  }
+
+  function renderDocs() {
+      const tbody = document.getElementById('docs-tbody');
+      tbody.innerHTML = '';
+      
+      // Pokazujemy od najnowszych
+      const sortedDocs = [...db.docs].reverse();
+
+      if(sortedDocs.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding: 24px; color:#666;">Brak historii dokumentów.</td></tr>`;
+          return;
+      }
+
+      sortedDocs.forEach(d => {
+          let badgeClass = `badge-${d.type}`;
+          tbody.innerHTML += `
+            <tr>
+              <td style="font-weight:700;">${d.date}</td>
+              <td><span class="badge ${badgeClass}">${d.type}</span></td>
+              <td style="font-weight:700; color:var(--alba-blue);">${d.container}</td>
+              <td style="text-align:center; font-weight:800; font-size:16px;">${d.amount}</td>
+              <td>${d.vehicle || '-'}</td>
+              <td>${d.driver || '-'}</td>
+              <td style="font-size:12px; color:var(--muted);">${d.reference ? 'Ref: '+d.reference+'<br>' : ''}${d.notes}</td>
+              <td style="text-align:right;">
+                <button class="btn danger small" onclick="removeDoc('${d.id}')">Usuń</button>
+              </td>
+            </tr>
+          `;
+      });
+  }
+
+  function removeDoc(id) {
+      if(confirm('Na pewno usunąć ten dokument z historii? Stan magazynowy zostanie przeliczony.')) {
+          db.docs = db.docs.filter(d => d.id !== id);
+          saveDb();
+      }
+  }
+
+  function onDocTypeChange() {
+      const type = document.getElementById('doc-type').value;
+      const reqColor = (type === 'WZ' || type === 'MM') ? 'var(--err)' : 'var(--muted)';
+      // Logika wizualna - jeśli WZ to pojazd/kierowca są istotne
+      document.getElementById('doc-vehicle').style.borderColor = reqColor;
+  }
+
+  // ADMINISTRACJA
+  function addDictItem(dictName, inputId) {
+      const val = document.getElementById(inputId).value.trim();
+      if(val && !db[dictName].includes(val)) {
+          db[dictName].push(val);
+          document.getElementById(inputId).value = '';
+          saveDb();
+      }
+  }
+
+  function addVehicle() {
+      const side = document.getElementById('inp-vehicle-side').value.trim().toUpperCase();
+      const reg = document.getElementById('inp-vehicle-reg').value.trim().toUpperCase();
+      if (side && !db.vehicles.find(v => v.sideNumber === side)) {
+          db.vehicles.push({ sideNumber: side, regNumber: reg });
+          document.getElementById('inp-vehicle-side').value = '';
+          document.getElementById('inp-vehicle-reg').value = '';
+          saveDb();
+      }
+  }
+
+  function addDriver() {
+      const name = document.getElementById('inp-driver-name').value.trim();
+      if (name && !db.drivers.find(d => d.name === name)) {
+          db.drivers.push({ name });
+          document.getElementById('inp-driver-name').value = '';
+          saveDb();
+      }
+  }
+
+  function removeDictItem(dictName, valOrIndex) {
+      if(confirm('Usunąć pozycję?')) {
+          if(Array.isArray(db[dictName])) {
+              if (typeof db[dictName][0] === 'string') {
+                  db[dictName] = db[dictName].filter(item => item !== valOrIndex);
+              } else {
+                  db[dictName].splice(valOrIndex, 1);
+              }
+              saveDb();
+          }
+      }
+  }
+
+  function renderAdminLists() {
+      const renderStrList = (dict, elemId) => {
+          const container = document.getElementById(elemId);
+          container.innerHTML = '';
+          db[dict].forEach(item => {
+              container.innerHTML += `<div class="list-item"><span>${item}</span> <button class="btn danger small" onclick="removeDictItem('${dict}', '${item}')">Usuń</button></div>`;
+          });
+      };
+      
+      renderStrList('containers', 'list-containers');
+      renderStrList('emails', 'list-emails');
+
+      const vContainer = document.getElementById('list-vehicles');
+      vContainer.innerHTML = '';
+      db.vehicles.forEach((v, idx) => {
+          vContainer.innerHTML += `<div class="list-item"><span>${v.sideNumber} (${v.regNumber})</span> <button class="btn danger small" onclick="removeDictItem('vehicles', ${idx})">Usuń</button></div>`;
+      });
+
+      const dContainer = document.getElementById('list-drivers');
+      dContainer.innerHTML = '';
+      db.drivers.forEach((d, idx) => {
+          dContainer.innerHTML += `<div class="list-item"><span>${d.name}</span> <button class="btn danger small" onclick="removeDictItem('drivers', ${idx})">Usuń</button></div>`;
+      });
+  }
+
+  function renderSelects() {
+      const fillSelect = (className, dataArr, displayFunc) => {
+          document.querySelectorAll('.' + className).forEach(sel => {
+              const prev = sel.value;
+              sel.innerHTML = '<option value="">-- Wybierz --</option>';
+              dataArr.forEach(item => {
+                  const val = typeof item === 'string' ? item : displayFunc(item, true);
+                  const label = typeof item === 'string' ? item : displayFunc(item, false);
+                  sel.innerHTML += `<option value="${val}">${label}</option>`;
+              });
+              sel.value = prev;
+          });
+      };
+
+      fillSelect('sel-container', db.containers);
+      fillSelect('sel-driver', db.drivers, (d, isVal) => isVal ? d.name : d.name);
+      fillSelect('sel-vehicle', db.vehicles, (v, isVal) => isVal ? v.sideNumber : `${v.sideNumber} (${v.regNumber})`);
+  }
+
+  // GENEROWANIE E-MAIL
+  function openEmailModal() {
+      const stockData = calculateStock();
+      let text = `Dzień dobry,\n\nPoniżej przesyłam bieżący raport stanu magazynu pojemników (Zaktualizowano: ${new Date().toLocaleString('pl-PL')}):\n\n`;
+      
+      for (const [name, qty] of Object.entries(stockData)) {
+          text += `- ${name}: ${qty} szt.\n`;
+      }
+      
+      text += `\nPozdrawiam,\nMagazyn WPO ALBA`;
+      
+      document.getElementById('email-content').value = text;
+      document.getElementById('email-modal').classList.add('active');
+  }
+
+  function closeModal() {
+      document.getElementById('email-modal').classList.remove('active');
+  }
+
+  function copyEmail() {
+      const el = document.getElementById('email-content');
+      el.select();
+      document.execCommand('copy');
+      alert('Skopiowano treść do schowka!');
+  }
+
+  function openMailClient() {
+      const content = document.getElementById('email-content').value;
+      const toEmail = db.emails.join(';');
+      const subject = `Raport stanu magazynu ALBA - ${new Date().toLocaleDateString('pl-PL')}`;
+      
+      window.location.href = `mailto:${toEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(content)}`;
+  }
+
+</script>
+</body>
+</html>
